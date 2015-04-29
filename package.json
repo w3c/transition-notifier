@@ -1,0 +1,25 @@
+{
+  "name": "transition-notifier",
+  "version": "1.0.0",
+  "description": "Notifier for public-review-announce",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/plehegar/transition-notifier.git"
+  },
+  "author": "plh@w3.org",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/plehegar/transition-notifier/issues"
+  },
+  "homepage": "https://github.com/plehegar/transition-notifier",
+  "dependencies": {
+    "email": "^0.2.6",
+    "es6-promise": "^2.1.1",
+    "handlebars": "^3.0.3",
+    "whacko": "^0.18.1"
+  }
+}
