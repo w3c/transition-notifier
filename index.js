@@ -102,8 +102,8 @@ function init() {
 function loop() {
   var saved;
 
-  io.readJSON("specref-v2.json").then(function (bibrefs) {
-  // fetchBibrefs().then(function (bibrefs) {
+//  io.readJSON("specref-v2.json").then(function (bibrefs) {
+  fetchBibrefs().then(function (bibrefs) {
     return new spec_manager(bibrefs);
   }).then(function (specs) {
     // those are new entries
