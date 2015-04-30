@@ -1,6 +1,7 @@
 var io = require("./io-promise");
 var SpecLoader = require("./spec").Spec;
 var notifySpec = require("./notify").notifySpec;
+var W3C_TR = require("./w3c_tr").specs;
 
 var spec_manager = function (bibrefs) {
   function filterSpecref(entries) {
@@ -9,9 +10,7 @@ var spec_manager = function (bibrefs) {
     // we filter out lots of useless references
     for (key in entries) {
       entry = entries[key];
-      if (entry.publisher !== undefined &&
-        entry.versionOf !== undefined &&
-        entry.publisher === "W3C" &&
+      if (entry.versionOf !== undefined &&
         entry.status !== "NOTE" &&
         entry.deliveredBy !== undefined &&
         entry.status !== undefined) {
@@ -28,8 +27,6 @@ var spec_manager = function (bibrefs) {
     for (key in entries) {
       entry = entries[key];
       if (entry.publisher !== undefined &&
-        entry.versionOf === undefined &&
-        entry.publisher === "W3C" &&
         entry.status !== "NOTE" &&
         entry.deliveredBy !== undefined &&
         entry.status !== undefined) {
@@ -59,9 +56,7 @@ spec_manager.prototype.getLatest = function(versionOf) {
 var w3c_specs = null;
 
 function fetchBibrefs () {
-  return io.fetch("https://specref.herokuapp.com/bibrefs").then(function(res) {
-    return res.json();
-  }).then(function (entries) {
+  return W3C_TR().then(function (entries) {
     return io.saveJSON("/tmp/specref.json", entries);
   });
 }
@@ -79,7 +74,7 @@ function notifier(spec) {
       title: s.title,
       sotd: text
     };
-    notifySpec(text);
+    notifySpec(obj);
   }).catch(function (err) {
     console.log(err);
   });
@@ -121,7 +116,6 @@ function loop() {
     return new_specs;
   }).then(function (specs) {
     var notifications = [];
-    var spec;
     specs.forEach(function (spec) {
       var latest = w3c_specs.getLatest(spec.versionOf);
       if (spec.status === "REC" ||
@@ -153,8 +147,7 @@ function loop() {
     console.log(err.stack);
   });
 
-  setTimeout(loop, 10800000); //every 3 hours
-  // @@specrec doesn't update itself so often...
+  setTimeout(loop, 900000); //every 15 minutes
 }
 
 init().then(function () {
