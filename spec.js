@@ -36,9 +36,16 @@ function getSotDSection(doc) {
         $div.append($(this).clone());
     });
     var output = "";
-    $div.children().each(function () {
-      output += "\n\n" + norm($(this).text().normalize());
-    });
+    function extractText(parent) {
+      if (parent.name === "div") {
+        $(parent).children().each(function () {      
+          extractText(this);
+        });
+      } else {
+        output += "\n\n" + norm($(parent).text().normalize());
+      }
+    }
+    extractText($div[0]);
     return output.substring(2);
 }
 
@@ -51,7 +58,7 @@ var exporter = {};
 exporter.Spec = function (s) {
   this.href = s.href;
   this.status = s.status;
-  this.title = "";
+  this.title = s.title;
   var self = this;
   this.getSotd = function () {
     return io.fetch(this.href)
@@ -66,9 +73,9 @@ exporter.Spec = function (s) {
   };
 };
 
-// var foo = new exporter.Spec({status: "PR", href: "http://www.w3.org/TR/2015/PR-webmessaging-20150407/"});
-// foo.getSotd().then(function (text) {
+//var foo = new exporter.Spec({status: "PR", href: "http://www.w3.org/TR/2015/WD-credential-management-1-20150430/"});
+//foo.getSotd().then(function (text) {
 //   console.log(text);
-// });
+//});
 
 module.exports = exporter;
