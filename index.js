@@ -40,22 +40,22 @@ var spec_manager = function (bibrefs) {
   this.latestVersions = filterLatest(bibrefs);
 };
 
-spec_manager.prototype.hasSpec = function(href) {
-    for (var i = this.entries.length - 1; i >= 0; i--) {
-      if (this.entries[i].href === href) {
-        return true;
-      }
+spec_manager.prototype.hasSpec = function (href) {
+  for (var i = this.entries.length - 1; i >= 0; i--) {
+    if (this.entries[i].href === href) {
+      return true;
     }
-    return false;
-  };
+  }
+  return false;
+};
 
-spec_manager.prototype.getLatest = function(versionOf) {
-    return this.latestVersions[versionOf];
-  };
+spec_manager.prototype.getLatest = function (versionOf) {
+  return this.latestVersions[versionOf];
+};
 
 var w3c_specs = null;
 
-function fetchBibrefs () {
+function fetchBibrefs() {
   return W3C_TR().then(function (entries) {
     return io.saveJSON("/tmp/specref.json", entries);
   });
@@ -63,18 +63,28 @@ function fetchBibrefs () {
 
 
 function notifier(spec) {
-  console.log("Notifier %s", spec.href);
-
   var s = new SpecLoader(spec);
   s.getSotd().then(function (text) {
     var obj = {
       href: spec.href,
       status: spec.status,
-      date: "1969-01-01",
-      title: s.title,
+      date: spec.date,
+      title: spec.title,
+      obsoletes: spec.obsoletes,
+      feedback: spec.feedbackDate,
       sotd: text
     };
-    notifySpec(obj);
+    if (obj.status === "WD") {
+      if (obj.obsoletes === undefined
+          || obj.sotd.indexOf("wide review") !== -1) {
+        notifySpec(obj);
+      } // else ignore
+    } else if (obj.status === "PR"
+               || obj.status === "REC") {
+      //ignore
+    } else {
+      notifySpec(obj);
+    }
   }).catch(function (err) {
     console.log(err);
   });
@@ -87,17 +97,17 @@ function init() {
   // ones if needed
   return io.readJSON("/tmp/specref.json")
     .catch(function (err) {
-      return fetchBibrefs();
-    }).then(function (bibrefs) {
-      w3c_specs = new spec_manager(bibrefs); // if undefined, this will throw
-      return w3c_specs;
-    });
+    return fetchBibrefs();
+  }).then(function (bibrefs) {
+    w3c_specs = new spec_manager(bibrefs); // if undefined, this will throw
+    return w3c_specs;
+  });
 }
 
 function loop() {
   var saved;
 
-//  io.readJSON("specref-v2.json").then(function (bibrefs) {
+  //  io.readJSON("specref-v2.json").then(function (bibrefs) {
   fetchBibrefs().then(function (bibrefs) {
     return new spec_manager(bibrefs);
   }).then(function (specs) {
@@ -129,7 +139,7 @@ function loop() {
         if (latest === undefined) {
           notifications.push(spec);
         } else if (latest.status !== spec.status &&
-                   spec.status !== "WD") {
+          spec.status !== "WD") {
           // if different status, we notify unless it's a back to WD one
           notifications.push(spec);
         }
