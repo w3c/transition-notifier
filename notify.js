@@ -16,6 +16,7 @@ var subjectTemplate = handlebars.compile("{{ status }}: {{ title }}"),
     bodyTemplate = handlebars.compile("{{ title }}\n\n{{ href }}\n\n{{ date }}\n\n{{ sotd }}");
 
 function notifySpec(spec) {
+  console.log("Notification: " + spec.href);
   var context = {
     title: spec.title,
     date: spec.date,
