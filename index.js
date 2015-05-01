@@ -3,7 +3,7 @@ var SpecLoader = require("./spec").Spec;
 var notifySpec = require("./notify").notifySpec;
 var W3C_TR = require("./w3c_tr").specs;
 
-var spec_manager = function (bibrefs) {
+var SpecManager = function (bibrefs) {
   function filterSpecref(entries) {
     var specs = [];
     var key, entry;
@@ -40,7 +40,7 @@ var spec_manager = function (bibrefs) {
   this.latestVersions = filterLatest(bibrefs);
 };
 
-spec_manager.prototype.hasSpec = function (href) {
+SpecManager.prototype.hasSpec = function (href) {
   for (var i = this.entries.length - 1; i >= 0; i--) {
     if (this.entries[i].href === href) {
       return true;
@@ -49,7 +49,7 @@ spec_manager.prototype.hasSpec = function (href) {
   return false;
 };
 
-spec_manager.prototype.getLatest = function (versionOf) {
+SpecManager.prototype.getLatest = function (versionOf) {
   return this.latestVersions[versionOf];
 };
 
@@ -99,7 +99,7 @@ function init() {
     .catch(function (err) {
     return fetchBibrefs();
   }).then(function (bibrefs) {
-    w3c_specs = new spec_manager(bibrefs); // if undefined, this will throw
+    w3c_specs = new SpecManager(bibrefs); // if undefined, this will throw
     return w3c_specs;
   });
 }
@@ -109,7 +109,7 @@ function loop() {
 
   //  io.readJSON("specref-v2.json").then(function (bibrefs) {
   fetchBibrefs().then(function (bibrefs) {
-    return new spec_manager(bibrefs);
+    return new SpecManager(bibrefs);
   }).then(function (specs) {
     // those are new entries
     console.log("Fetched %d entries", specs.entries.length);
@@ -128,28 +128,19 @@ function loop() {
     var notifications = [];
     specs.forEach(function (spec) {
       var latest = w3c_specs.getLatest(spec.versionOf);
-      if (spec.status === "REC" ||
-        spec.status === "PR" ||
-        spec.status === "LCWD" ||
-        spec.status === "PER") {
-        // we always notify for LC, REC, PR, or PER
-        spec.previousVersion = latest;
-        notifications.push(spec);
-      } else {
-        if (latest === undefined) {
-          notifications.push(spec);
-        } else if (latest.status !== spec.status &&
-          spec.status !== "WD") {
-          // if different status, we notify unless it's a back to WD one
-          notifications.push(spec);
-        }
-      }
+      spec.previousVersion = latest;
+      notifications.push(spec);
     });
     return notifications;
   }).then(function (specs) {
-    specs.forEach(function (spec) {
-      notifier(spec);
-    });
+    if (specs.length > 20) {
+      // this is suspicious...
+      console.log("WARNING: TOO MANY NOTIFICATIONS. IGNORING.");
+    } else {
+      specs.forEach(function (spec) {
+        notifier(spec);
+      });
+    }
     return specs;
   }).then(function (specs) {
     return io.saveJSON("entries.json", specs);
