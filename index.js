@@ -1,6 +1,6 @@
 var io = require("./io-promise");
-var SpecLoader = require("./spec").Spec;
-var notifySpec = require("./notify").notifySpec;
+var loadSpecification = require("./spec").loadSpecification;
+var notify = require("./notify").notify;
 var W3C_TR = require("./w3c_tr").specs;
 
 var SpecManager = function (bibrefs) {
@@ -22,22 +22,16 @@ var SpecManager = function (bibrefs) {
 
   function filterLatest(entries) {
     var specs = {};
-    var key, entry;
+    var key;
     // we filter out lots of useless references
     for (key in entries) {
-      entry = entries[key];
-      if (entry.publisher !== undefined &&
-        entry.status !== "NOTE" &&
-        entry.deliveredBy !== undefined &&
-        entry.status !== undefined) {
-        specs[key] = entry;
-      }
+      specs[key] = entries[key];
     }
     return specs;
   }
 
   this.entries = filterSpecref(bibrefs);
-  this.latestVersions = filterLatest(bibrefs);
+  this.latestVersions = filterLatest(this.entries);
 };
 
 SpecManager.prototype.hasSpec = function (href) {
@@ -61,32 +55,27 @@ function fetchBibrefs() {
   });
 }
 
-
 function notifier(spec) {
-  var s = new SpecLoader(spec);
-  s.getSotd().then(function (text) {
+  loadSpecification(spec).then(function (specData) {
     var obj = {
       href: spec.href,
       status: spec.status,
       date: spec.date,
       title: spec.title,
+      editors: spec.editors,
       obsoletes: spec.obsoletes,
       feedback: spec.feedbackDate,
-      sotd: text
+      sotd: specData.sotd,
+      abstract: specData.abstract,
+      deliveredBy: spec.deliveredBy,
+      editorDraft: spec.editorDraft,
+      versionOf: spec.versionOf
     };
-    if (obj.status === "WD") {
-      if (obj.obsoletes === undefined
-          || obj.sotd.indexOf("wide review") !== -1) {
-        notifySpec(obj);
-      } // else ignore
-    } else if (obj.status === "PR"
-               || obj.status === "REC") {
-      //ignore
-    } else {
-      notifySpec(obj);
-    }
+    notify(obj);
   }).catch(function (err) {
+    console.log("Failure to notify");
     console.log(err);
+    console.log(err.stack);
   });
 
   return;
@@ -145,6 +134,7 @@ function loop() {
   }).then(function (specs) {
     return io.saveJSON("entries.json", specs);
   }).catch(function (err) {
+    console.log(err);
     console.log(err.stack);
   });
 

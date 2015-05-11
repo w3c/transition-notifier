@@ -9,16 +9,19 @@ function norm(str) {
     .replace(/\s+/g, " ");
 }
 
-function extractParagraph(doc, parent) {
-  if (parent.name === "div") {
-    var output = "";
-    doc(parent).children().each(function () {
-      output += extractParagraph(doc, this);
-    });
-    return output;
-  } else {
-    return "\n\n" + norm(doc(parent).text().normalize());
+function toText(doc, child) {
+  function extractParagraphText(parent) {
+    if (parent.name === "div") {
+      var output = "";
+      doc(parent).children().each(function () {
+        output += extractParagraphText(this);
+      });
+      return output;
+    } else {
+      return "\n\n" + norm(doc(parent).text().normalize());
+    }
   }
+  return extractParagraphText(child).substring(2);
 }
 
 function getSection(doc, titleRegExp) {
@@ -46,38 +49,33 @@ function getSection(doc, titleRegExp) {
     if (endH2[0] === this) return false;
     div.append(doc(this).clone());
   });
-  var output = extractParagraph(doc, div[0]);
-  return output.substring(2);
+  return div;
 }
 
 var exporter = {};
 
-exporter.Spec = function (s) {
-  this.href = s.href;
-  this.status = s.status;
-  this.title = s.title;
-  this.document = io.fetch(this.href)
-      .then(function (res) {
-      return res.text().then(function (data) {
-        return whacko.load(data);
-      });
+exporter.loadSpecification = function(s) {
+  return io.fetch(s.href).then(function (res) {
+    return res.text().then(function (data) {
+      return whacko.load(data);
     });
-  this.getSotd = function () {
-    return this.document.then(function (doc) {
-      return getSection(doc, /^Status [Oo]f [Tt]his [Dd]ocument$/);
-    });
-  };
-
-  this.getAbstract = function () {
-    return this.document.then(function (doc) {
-      return getSection(doc, /^Abstract$/);
-    });
-  };
+  }).then(function (document) {
+    var spec = {};
+    spec.href = s.href;
+    spec.title = document("title").text();
+    spec.abstract = toText(document, getSection(document, /^Abstract$/)[0]);
+    spec.sotd = toText(document, getSection(document, /^Status [Oo]f [Tt]his [Dd]ocument$/)[0]);
+    return spec;
+  });
 };
 
-//var foo = new exporter.Spec({status: "PR", href: "http://www.w3.org/TR/2015/WD-credential-management-1-20150430/"});
-//foo.getAbstract().then(function (text) {
-//   console.log(text);
+//var p = exporter.loadSpecification({status: "PR", href: "http://www.w3.org/TR/2015/WD-credential-management-1-20150430/"});
+//p.then(function (spec) {
+//   console.log(spec.title);
+//   console.log(spec.abstract);
+//}).catch(function (err) {
+//  console.log(err);
+//  console.log(err.stack);
 //});
 
 module.exports = exporter;
