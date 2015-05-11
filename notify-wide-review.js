@@ -39,9 +39,11 @@ function notifyWideReview(spec) {
   });
 
   msg.send(function (err) {
-    console.log("Failure to notify for wide review for " + spec.href);
-    console.log(err);
-    console.log(err.stack);
+    if (err !== null) {
+      console.log("Failure to notify for wide review for " + spec.href);
+      console.log(err);
+      console.log(err.stack);
+    }
   });
 }
 
