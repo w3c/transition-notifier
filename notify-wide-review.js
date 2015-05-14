@@ -6,7 +6,7 @@ var MAILING_LIST, SENDER_EMAIL;
 
 if (process.env.NODE_ENV == 'production') {
   MAILING_LIST = "public-review-announce@w3.org";
-  SENDER_EMAIL = "webreq@w3.org";
+  SENDER_EMAIL = "notifier@aries.w3.org";
 } else {
   MAILING_LIST = "plh@w3.org";
   SENDER_EMAIL = "plh@w3.org";
