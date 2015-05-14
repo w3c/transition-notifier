@@ -47,11 +47,15 @@ SpecManager.prototype.getLatest = function (versionOf) {
   return this.latestVersions[versionOf];
 };
 
+
+var SPEC_LIST_FILE = "/tmp/specref.json";
 var w3c_specs = null;
+
+
 
 function fetchBibrefs() {
   return W3C_TR().then(function (entries) {
-    return io.saveJSON("/tmp/specref.json", entries);
+    return io.saveJSON(SPEC_LIST_FILE, entries);
   });
 }
 
@@ -114,14 +118,19 @@ function loop() {
     });
     return new_specs;
   }).then(function (specs) {
+    // establishes the list of new entries
     var notifications = [];
+    // @@ is this really or can it be combined with the previous then?!?
     specs.forEach(function (spec) {
       var latest = w3c_specs.getLatest(spec.versionOf);
       spec.previousVersion = latest;
       notifications.push(spec);
     });
+    // replace the previous list of specs with the new one
+    w3c_specs = saved;
     return notifications;
   }).then(function (specs) {
+    // ok, we notify now
     if (specs.length > 20) {
       // this is suspicious...
       console.log("WARNING: TOO MANY NOTIFICATIONS. IGNORING.");
@@ -132,6 +141,7 @@ function loop() {
     }
     return specs;
   }).then(function (specs) {
+    // not really needed
     return io.saveJSON("entries.json", specs);
   }).catch(function (err) {
     console.log(err);
