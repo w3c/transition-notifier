@@ -10,15 +10,21 @@ function norm(str) {
 }
 
 function toText(doc, child) {
-  function extractParagraphText(parent) {
-    if (parent.name === "div") {
+  function extractParagraphText(node) {
+    switch(node.name) {
+    case "div":
       var output = "";
-      doc(parent).children().each(function () {
+      doc(node).children().each(function () {
         output += extractParagraphText(this);
       });
       return output;
-    } else {
-      return "\n\n" + norm(doc(parent).text().normalize());
+    case "p":
+        return "\n\n" + norm(doc(node).text().normalize());
+    case "style":
+    case "script":
+        return "";
+    default:
+        return norm(doc(node).text().normalize());
     }
   }
   return extractParagraphText(child).substring(2);
@@ -69,13 +75,13 @@ exporter.loadSpecification = function(s) {
   });
 };
 
-//var p = exporter.loadSpecification({status: "PR", href: "http://www.w3.org/TR/2015/WD-credential-management-1-20150430/"});
-//p.then(function (spec) {
-//   console.log(spec.title);
-//   console.log(spec.abstract);
-//}).catch(function (err) {
-//  console.log(err);
-//  console.log(err.stack);
-//});
+var p = exporter.loadSpecification({status: "PR", href: "http://www.w3.org/TR/2015/WD-2dcontext-20150514/"});
+p.then(function (spec) {
+   console.log(spec.title);
+   console.log(spec.sotd);
+}).catch(function (err) {
+  console.log(err);
+  console.log(err.stack);
+});
 
 module.exports = exporter;
