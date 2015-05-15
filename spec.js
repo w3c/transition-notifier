@@ -75,13 +75,13 @@ exporter.loadSpecification = function(s) {
   });
 };
 
-var p = exporter.loadSpecification({status: "PR", href: "http://www.w3.org/TR/2015/WD-2dcontext-20150514/"});
-p.then(function (spec) {
-   console.log(spec.title);
-   console.log(spec.sotd);
-}).catch(function (err) {
-  console.log(err);
-  console.log(err.stack);
-});
+// var p = exporter.loadSpecification({status: "PR", href: "http://www.w3.org/TR/2015/WD-2dcontext-20150514/"});
+// p.then(function (spec) {
+//    console.log(spec.title);
+//    console.log(spec.sotd);
+// }).catch(function (err) {
+//   console.log(err);
+//   console.log(err.stack);
+// });
 
 module.exports = exporter;
