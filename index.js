@@ -68,7 +68,7 @@ function notifier(spec) {
       title: spec.title,
       editors: spec.editors,
       obsoletes: spec.obsoletes,
-      feedback: spec.feedbackDate,
+      feedbackDate: spec.feedbackDate,
       sotd: specData.sotd,
       abstract: specData.abstract,
       deliveredBy: spec.deliveredBy,
