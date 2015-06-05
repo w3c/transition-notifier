@@ -18,11 +18,15 @@ var subjectTemplate = handlebars.compile("{{ status }}: {{ title }}"),
 
 function notifyWideReview(spec) {
   console.log("Notification for wide review: " + spec.href);
+  var status = spec.status;
+  if (spec.obsoletes === undefined) {
+    status = "FPWD";
+  }
   var context = {
     title: spec.title,
     date: spec.date,
     href: spec.href,
-    status: spec.status,
+    status: status,
     sotd: spec.sotd,
     abstract: spec.abstract,
     feedbackDate: (spec.feedbackDate === undefined) ?
