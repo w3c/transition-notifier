@@ -27,7 +27,7 @@ function toText(doc, child) {
         return norm(doc(node).text().normalize());
     }
   }
-  return extractParagraphText(child).substring(2);
+  return extractParagraphText(child).substring(2).replace(/&#x27;/g, "'").replace(/&amp;/, "&");
 }
 
 function getSection(doc, titleRegExp) {
