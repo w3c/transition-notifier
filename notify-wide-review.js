@@ -30,7 +30,7 @@ function notifyWideReview(spec) {
     sotd: spec.sotd,
     abstract: spec.abstract,
     feedbackDate: (spec.feedbackDate === undefined) ?
-      "" : "\\nnfeedback due by: " + spec.feedbackDate,
+      "" : "\n\nfeedback due by: " + spec.feedbackDate,
     timestamp: Date.now()
   };
 
