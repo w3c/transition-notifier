@@ -13,7 +13,7 @@ function toText(doc, child) {
   function extractParagraphText(node) {
     switch(node.name) {
     case "div":
-      var output = "";
+      var output = "\n";
       doc(node).children().each(function () {
         output += extractParagraphText(this);
       });
