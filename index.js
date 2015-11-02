@@ -142,8 +142,12 @@ function loop() {
     // not really needed
     return io.save("entries.json", specs);
   }).catch(function (err) {
-    console.log(err);
-    console.log(err.stack);
+    if (err.status === "same") {
+      console.log(err.message);
+    } else {
+      console.log(err);
+      console.log(err.stack);
+    }
   });
 
   setTimeout(loop, 900000); //every 15 minutes

@@ -63,10 +63,34 @@ function getSpec(ref, status) {
     return obj;
 }
 
+var W3C_RDF_HEADERS = "/tmp/tr.headers.json";
+
 function fetchRDF() {
-    // return io.read("tr.rdf");
-    return io.fetch(RDF_FILE).then(function (res) {
-        return res.text();
+    return io.readJSON(W3C_RDF_HEADERS)
+      .then(function (data) {
+        var previous_headers = data;
+        var previous_etag = previous_headers.etag;
+        return io.head(RDF_FILE).then(function (res) {
+            var new_headers = res.headers;
+            var new_etag = new_headers.etag;
+            if (previous_etag !== new_etag) {
+              return true;
+            } else {
+              return false;
+            }
+        });
+    }).catch(function (err) {
+      return true;
+    }).then(function (needfetch) {
+      if (needfetch) {
+        // return io.read("tr.rdf");
+        return io.fetch(RDF_FILE).then(function (res) {
+          io.save(W3C_RDF_HEADERS, res.headers);
+          return res.text();
+        });
+      } else {
+        throw { message: "tr.rdf did not change", "status": "same"};
+      }
     });
 }
 
