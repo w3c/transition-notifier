@@ -51,11 +51,9 @@ SpecManager.prototype.getLatest = function (versionOf) {
 var SPEC_LIST_FILE = "/tmp/specref.json";
 var w3c_specs = null;
 
-
-
 function fetchBibrefs() {
   return W3C_TR().then(function (entries) {
-    return io.saveJSON(SPEC_LIST_FILE, entries);
+    return io.save(SPEC_LIST_FILE, entries);
   });
 }
 
@@ -142,7 +140,7 @@ function loop() {
     return specs;
   }).then(function (specs) {
     // not really needed
-    return io.saveJSON("entries.json", specs);
+    return io.save("entries.json", specs);
   }).catch(function (err) {
     console.log(err);
     console.log(err.stack);
