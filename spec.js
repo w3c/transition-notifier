@@ -14,7 +14,7 @@ function toText(doc, child) {
     switch(node.name) {
     case "div":
       var output = "\n";
-      doc(node).children().each(function () {
+      doc(node).contents().each(function () {
         output += extractParagraphText(this);
       });
       return output;
@@ -24,36 +24,33 @@ function toText(doc, child) {
     case "script":
         return "";
     default:
-        return norm(doc(node).text().normalize());
+        return " " + norm(doc(node).text().normalize());
     }
   }
   return extractParagraphText(child).substring(2).replace(/&#x27;/g, "'").replace(/&amp;/, "&");
 }
 
 function getSection(doc, titleRegExp) {
-  var startH2, endH2
-    , div = doc("<div></div>");
+  var startH2,
+      div = doc("<div></div>");
+
   doc("h2").each(function () {
     var h2 = doc(this);
-    if (startH2) {
-      endH2 = h2;
-      return false;
-    }
     if (titleRegExp.test(norm(h2.text())))
       startH2 = h2;
   });
-  if (!startH2 || !endH2) {
+  if (!startH2) {
     return div;
   }
-  var started = false;
-  startH2.parent().children().each(function () {
-    if (startH2[0] === this) {
-      started = true;
-      return;
+
+  var inAppendMode = true;
+  startH2.nextUntil("h2").each(function () {
+    if (this.tagName === "nav") {
+      inAppendMode = false;
     }
-    if (!started) return;
-    if (endH2[0] === this) return false;
-    div.append(doc(this).clone());
+    if (inAppendMode) {
+      div.append(doc(this).clone());
+    }
   });
   return div;
 }
@@ -68,7 +65,7 @@ exporter.loadSpecification = function(s) {
   }).then(function (document) {
     var spec = {};
     spec.href = s.href;
-    spec.title = document("title").text();
+    spec.title = norm(document("title").text());
     spec.abstract = toText(document, getSection(document, /^Abstract$/)[0]);
     spec.sotd = toText(document, getSection(document, /^Status [Oo]f [Tt]his [Dd]ocument$/)[0]);
     return spec;
