@@ -104,9 +104,11 @@ function getSpecs() {
                             var specs = [];
                             var refs = result['rdf:RDF'];
                             Object.keys(STATUSES).forEach(function (k) {
-                                refs[k].forEach(function (s) {
-                                    specs.push(getSpec(s, STATUSES[k]));
-                                });
+                                if (refs[k] !== undefined) {
+                                  refs[k].forEach(function (s) {
+                                      specs.push(getSpec(s, STATUSES[k]));
+                                  });
+                                }
                             });
                             resolve(specs);
                         }
