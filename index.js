@@ -129,7 +129,7 @@ function loop() {
     return notifications;
   }).then(function (specs) {
     // ok, we notify now
-    if (specs.length > 20) {
+    if (specs.length > 50) {
       // this is suspicious...
       console.log("WARNING: TOO MANY NOTIFICATIONS. IGNORING.");
     } else {
