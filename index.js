@@ -142,9 +142,7 @@ function loop() {
     // not really needed
     return io.save("entries.json", specs);
   }).catch(function (err) {
-    if (err.status === "same") {
-      console.log(err.message);
-    } else {
+    if (err.status !== "same") {
       console.log(err);
       console.log(err.stack);
     }
