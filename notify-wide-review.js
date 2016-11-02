@@ -12,7 +12,7 @@ if (process.env.NODE_ENV == 'production') {
   SENDER_EMAIL = "plh@w3.org";
 }
 
-var subjectTemplate = handlebars.compile("{{ status }}: {{ title }}"),
+var subjectTemplate = handlebars.compile("{{ status }}: {{ title }}{{cfwd}}"),
   fromTemplate = handlebars.compile("{{ name }} <{{email}}>"),
   bodyTemplate = handlebars.compile("{{ title }}\n\n{{ href }}{{ feedbackDate }}\n\nAbstract\n\n{{ abstract }}\n\nStatus of the Document\n\n{{ sotd }}");
 
@@ -33,6 +33,11 @@ function notifyWideReview(spec) {
       "" : "\n\nfeedback due by: " + spec.feedbackDate,
     timestamp: Date.now()
   };
+  if (spec.sotd.indexOf("wide review") !== -1) {
+    context.cfwd = " (Call for Wide Review)";
+  } else {
+    context.cfwd = "";
+  }
 
   var msg = new Email({
     messageId: context.href,
