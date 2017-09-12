@@ -48,7 +48,7 @@ SpecManager.prototype.getLatest = function (versionOf) {
 };
 
 
-var SPEC_LIST_FILE = "/tmp/specref.json";
+var SPEC_LIST_FILE = "/home/node/specref.json";
 var w3c_specs = null;
 
 function fetchBibrefs() {
@@ -86,7 +86,7 @@ function notifier(spec) {
 function init() {
   // we're booting the notifier by reusing the previous entries or fetching new
   // ones if needed
-  return io.readJSON("/tmp/specref.json")
+  return io.readJSON(SPEC_LIST_FILE)
     .catch(function (err) {
     return fetchBibrefs();
   }).then(function (bibrefs) {
