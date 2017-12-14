@@ -17,7 +17,7 @@ var subjectTemplate = handlebars.compile("{{ status }}: {{ title }}{{cfwd}}"),
   bodyTemplate = handlebars.compile("{{ title }}\n\n{{ href }}{{ feedbackDate }}\n\nAbstract\n\n{{ abstract }}\n\nStatus of the Document\n\n{{ sotd }}");
 
 function notifyWideReview(spec) {
-  console.log("Notification for wide review: " + spec.href);
+  console.log("[Email] Notification: " + spec.href);
   var status = spec.status;
   if (spec.obsoletes === undefined) {
     status = "FPWD";
@@ -49,7 +49,7 @@ function notifyWideReview(spec) {
 
   msg.send(function (err) {
     if (err !== null) {
-      console.log("Failure to notify for wide review for " + spec.href);
+      console.log("Failure to send email for " + spec.href);
       console.log(err);
       console.log(err.stack);
     }

@@ -3,7 +3,7 @@
 var notifyWideReview = require("./notify-wide-review").notifyWideReview;
 
 function notify(spec) {
-  console.log("Notification: " + spec.href);
+  console.log("New document: " + spec.href);
 
   if (spec.status === "WD") {
     if (spec.obsoletes === undefined
