@@ -44,7 +44,8 @@ function notifyWideReview(spec) {
     to: [MAILING_LIST],
     body: bodyTemplate(context),
     subject: subjectTemplate(context),
-    from: "Notifier <" + SENDER_EMAIL + ">"
+    from: "Notifier <" + SENDER_EMAIL + ">",
+    path: "/usr/sbin/sendmail"
   });
 
   msg.send(function (err) {
