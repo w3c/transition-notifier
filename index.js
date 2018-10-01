@@ -75,9 +75,9 @@ function notifier(spec) {
     };
     notify(obj);
   }).catch(function (err) {
-    console.log("Failure to notify");
-    console.log(err);
-    console.log(err.stack);
+    console.error("Failure to notify");
+    console.error(err);
+    console.error(err.stack);
   });
 
   return;
@@ -131,7 +131,7 @@ function loop() {
     // ok, we notify now
     if (specs.length > 50) {
       // this is suspicious...
-      console.log("WARNING: TOO MANY NOTIFICATIONS. IGNORING.");
+      console.error("WARNING: TOO MANY NOTIFICATIONS. IGNORING.");
     } else {
       specs.forEach(function (spec) {
         notifier(spec);
@@ -143,8 +143,8 @@ function loop() {
     return io.save("entries.json", specs);
   }).catch(function (err) {
     if (err.status !== "same") {
-      console.log(err);
-      console.log(err.stack);
+      console.error(err);
+      console.error(err.stack);
     }
   });
 
@@ -154,9 +154,9 @@ function loop() {
 init().then(function () {
   loop();
 }).catch(function (err) {
-  console.log("Error during initialization");
-  console.log(err);
-  console.log(err.stack);
+  console.error("Error during initialization");
+  console.error(err);
+  console.error(err.stack);
 }).then(function () {
   if (w3c_specs && w3c_specs.entries) {
     console.log("Initialized %d entries", w3c_specs.entries.length);

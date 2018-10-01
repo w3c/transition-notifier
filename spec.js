@@ -39,7 +39,7 @@ function toText(child) {
     case "#comment":
       return "";
     default:
-        console.log("Unknown node name " + node.nodeName);
+        console.error("Unknown node name " + node.nodeName);
         return " " + norm(node.textContent);
     }
   }
@@ -59,7 +59,6 @@ function getSiblings(element) {
 }
 
 function getSection(document, titleRegExp) {
-  console.log("Get section is invoked " + document.href);
   let startH2,
       div = document.createElement("div");
 

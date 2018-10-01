@@ -54,7 +54,7 @@ function notifyWideReview(spec) {
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
       sendError(error); // notify plh
-      return console.log(error);
+      return console.error(error);
     }
     console.log('Message sent: %s', info.messageId);
   });
@@ -71,7 +71,7 @@ function sendError(error) {
 
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
-        return console.log(error);
+        return console.error(JSON.stringify(error));
     }
     console.log('Error message sent: %s', info.messageId);
   });
