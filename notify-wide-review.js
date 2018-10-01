@@ -1,6 +1,13 @@
 "use strict";
-var Email = require('email').Email,
-  handlebars = require('handlebars');
+const nodemailer = require('nodemailer');
+var handlebars = require('handlebars');
+
+
+let transporter = nodemailer.createTransport({
+    sendmail: true,
+    newline: 'unix',
+    path: '/usr/sbin/sendmail',
+});
 
 var MAILING_LIST, SENDER_EMAIL;
 
@@ -12,9 +19,7 @@ if (process.env.NODE_ENV == 'production') {
   SENDER_EMAIL = "plh@w3.org";
 }
 
-var subjectTemplate = handlebars.compile("{{ status }}: {{ title }}{{cfwd}}"),
-  fromTemplate = handlebars.compile("{{ name }} <{{email}}>"),
-  bodyTemplate = handlebars.compile("{{ title }}\n\n{{ href }}{{ feedbackDate }}\n\nAbstract\n\n{{ abstract }}\n\nStatus of the Document\n\n{{ sotd }}");
+var bodyTemplate = handlebars.compile("{{ title }}\n\n{{ href }}{{ feedbackDate }}\n\nAbstract\n\n{{ abstract }}\n\nStatus of the Document\n\n{{ sotd }}");
 
 function notifyWideReview(spec) {
   console.log("[Email] Notification: " + spec.href);
@@ -39,22 +44,38 @@ function notifyWideReview(spec) {
     context.cfwd = "";
   }
 
-  var msg = new Email({
-    messageId: context.href,
-    to: [MAILING_LIST],
-    body: bodyTemplate(context),
-    subject: subjectTemplate(context),
+  let mailOptions = {
     from: "Notifier <" + SENDER_EMAIL + ">",
-    path: "/usr/sbin/sendmail"
+    to: MAILING_LIST,
+    subject: context.status+": "+context.title+context.cfwd,
+    text: bodyTemplate(context)
+  };
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      sendError(error); // notify plh
+      return console.log(error);
+    }
+    console.log('Message sent: %s', info.messageId);
   });
 
-  msg.send(function (err) {
-    if (err !== null) {
-      console.log("Failure to send email for " + spec.href);
-      console.log(err);
-      console.log(err.stack);
+}
+
+function sendError(error) {
+  let mailOptions = {
+    from: "Notifier <" + SENDER_EMAIL + ">",
+    to: "plh@w3.org",
+    subject: "We've got an error on transition-notifier",
+    text: "You might want to look at " + JSON.stringify(error)
+  };
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+        return console.log(error);
     }
+    console.log('Error message sent: %s', info.messageId);
   });
+
 }
 
 exports.notifyWideReview = notifyWideReview;

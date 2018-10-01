@@ -1,6 +1,4 @@
-require('es6-promise').polyfill();
-
-var io = require('./io-promise'),
+var io = require('io-promise'),
     xml2js = require('xml2js');
 
 var RDF_FILE = "http://www.w3.org/2002/01/tr-automation/tr.rdf";

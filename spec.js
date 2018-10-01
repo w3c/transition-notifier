@@ -1,84 +1,127 @@
-var whacko = require("whacko");
-var io = require("./io-promise");
+const jsdom = require("jsdom");
+const { JSDOM } = jsdom;
+var io = require("io-promise");
 
 function norm(str) {
   if (!str) return "";
   str = "" + str;
-  return str.replace(/^\s+/, "")
+  return str.normalize().trim().replace(/^\s+/, "")
     .replace(/\s+$/, "")
-    .replace(/\s+/g, " ");
+    .replace(/\s+/g, " ")
+    .replace(/&#x27;/g, "'").replace(/&amp;/, "&");
 }
 
-function toText(doc, child) {
+function toText(child) {
   function extractParagraphText(node) {
-    switch(node.name) {
-    case "div":
-      var output = "\n";
-      doc(node).contents().each(function () {
-        output += extractParagraphText(this);
-      });
+    switch(node.nodeName) {
+    case "DIV":
+    case "SECTION":
+    case "UL":
+      let output = "\n";
+      node.childNodes.forEach(e =>  output += extractParagraphText(e));
       return output;
-    case "p":
-        return "\n\n" + norm(doc(node).text().normalize());
-    case "style":
-    case "script":
+    case "P":
+    case "H2":
+    case "H3":
+    case "H4":
+        return "\n\n" + norm(node.textContent);
+    case "LI":
+        return "\n  * " + norm(node.textContent);
+    case "STYLE":
+    case "SCRIPT":
         return "";
+    case "SPAN":
+    case "A":
+    case "EM":
+    case "STRONG":
+    case "#text":
+        return " " + norm(node.textContent);
+    case "#comment":
+      return "";
     default:
-        return " " + norm(doc(node).text().normalize());
+        console.log("Unknown node name " + node.nodeName);
+        return " " + norm(node.textContent);
     }
   }
-  return extractParagraphText(child).substring(2).replace(/&#x27;/g, "'").replace(/&amp;/, "&");
+  return extractParagraphText(child).trim();
 }
 
-function getSection(doc, titleRegExp) {
-  var startH2,
-      div = doc("<div></div>");
+function getSiblings(element) {
+  let siblings = [];
+  do {
+    if (element.nodeName === "H2" || element.nodeName === "NAV") {
+      return siblings;
+    }
+    siblings.push(element);
+    element = element.nextElementSibling;
+  } while (element !== null);
+  return siblings;
+}
 
-  doc("h2").each(function () {
-    var h2 = doc(this);
-    if (titleRegExp.test(norm(h2.text())))
+function getSection(document, titleRegExp) {
+  console.log("Get section is invoked " + document.href);
+  let startH2,
+      div = document.createElement("div");
+
+  document.querySelectorAll("h2").forEach(h2 => {
+    if (titleRegExp.test(h2.textContent)) {
       startH2 = h2;
-  });
+    }
+  })
   if (!startH2) {
-    return div;
+    throw new Error("Can't find " + titleRegExp);
+    // return div;
   }
 
-  var inAppendMode = true;
-  startH2.nextUntil("h2").each(function () {
-    if (this.tagName === "nav") {
-      inAppendMode = false;
-    }
-    if (inAppendMode) {
-      div.append(doc(this).clone());
-    }
-  });
+  let siblings = getSiblings(startH2.nextElementSibling);
+  siblings.forEach(e => div.appendChild(e));
   return div;
 }
 
-var exporter = {};
+function getAbstract(doc) {
+  let abstract = doc.querySelector("div[data-fill-with=abstract]");
+  let children = [];
+  if (!abstract) {
+    abstract = doc.querySelector("section#abstract");
+  }
+  if (abstract) {
+    let title = abstract.querySelector("h2");
+    if (title) {
+      title.parentNode.removeChild(title);
+    }
+    return abstract;
+  } else {
+    return getSection(doc, /^Abstract$/);
+  }
+}
 
-exporter.loadSpecification = function(s) {
-  return io.fetch(s.href).then(function (res) {
-    return res.text().then(function (data) {
-      return whacko.load(data);
-    });
-  }).then(function (document) {
+function getSOTD(doc) {
+  let sotd = doc.querySelector("div[data-fill-with=status]");
+  let children = [];
+  if (!sotd) {
+    sotd = doc.querySelector("section#sotd");
+  }
+  if (sotd) {
+    let title = sotd.querySelector("h2");
+    if (title) {
+      title.parentNode.removeChild(title);
+    }
+    return sotd;
+  } else {
+    return getSection(doc, /^Status [Oo]f [Tt]his [Dd]ocument$/);
+  }
+}
+
+function loadSpecification(href) {
+  return io.fetch(href).then(res => res.text().then(data => new JSDOM(data).window.document)
+    .then(document => {
     var spec = {};
-    spec.href = s.href;
-    spec.title = norm(document("title").text());
-    spec.abstract = toText(document, getSection(document, /^Abstract$/)[0]);
-    spec.sotd = toText(document, getSection(document, /^Status [Oo]f [Tt]his [Dd]ocument$/)[0]);
+    spec.href = href;
+    spec.title = norm(document.querySelector("title").textContent);
+    spec.abstract = toText(getAbstract(document));
+    spec.sotd = toText(getSOTD(document));
     return spec;
-  });
-};
+  }));
+}
 
-// var p = exporter.loadSpecification({status: "PR", href: "http://www.w3.org/TR/2015/WD-2dcontext-20150514/"});
-// p.then(function (spec) {
-//    console.log(spec.title);
-//    console.log(spec.sotd);
-// }).catch(function (err) {
-//   console.log(err);
-//   console.log(err.stack);
-// });
-
-module.exports = exporter;
+module.exports = loadSpecification;

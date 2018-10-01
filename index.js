@@ -1,5 +1,5 @@
-var io = require("./io-promise");
-var loadSpecification = require("./spec").loadSpecification;
+var io = require("io-promise");
+var loadSpecification = require("./spec");
 var notify = require("./notify").notify;
 var W3C_TR = require("./w3c_tr").specs;
 
