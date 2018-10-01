@@ -11,7 +11,7 @@ function runTestFiles(files) {
       console.log("Running tests in " + testFile + "\n");
       require(testFolder + "/" + testFile);
       if (index < (files.length -1)) {
-        runText(index+1);
+        runTest(index+1);
       }
     })
   }
