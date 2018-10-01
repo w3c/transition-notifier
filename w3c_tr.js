@@ -115,5 +115,5 @@ function getSpecs() {
             });
         }
 
-exports.specs = getSpecs;
+module.exports = getSpecs;
 

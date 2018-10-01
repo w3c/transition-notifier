@@ -1,7 +1,7 @@
 const io = require("io-promise");
 const loadSpecification = require("./spec");
 const notify = require("./notify");
-const W3C_TR = require("./w3c_tr").specs;
+const W3C_TR = require("./w3c_tr");
 
 let SpecManager = function (bibrefs) {
   function filterSpecref(entries) {
