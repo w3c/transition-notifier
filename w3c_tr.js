@@ -1,9 +1,9 @@
-var io = require('io-promise'),
+const io = require('io-promise'),
     xml2js = require('xml2js');
 
-var RDF_FILE = "http://www.w3.org/2002/01/tr-automation/tr.rdf";
+const RDF_FILE = "http://www.w3.org/2002/01/tr-automation/tr.rdf";
 
-var STATUSES = {
+const STATUSES = {
     'NOTE': 'NOTE',
     'REC': 'REC',
     'CR': 'CR',
@@ -13,14 +13,14 @@ var STATUSES = {
     'PR': 'PR'
 };
 
-var parser = new xml2js.Parser();
+const parser = new xml2js.Parser();
 
 function getEditor(ed) {
     return ed["contact:fullName"][0];
 }
 
 function getSpec(ref, status) {
-    var obj = {};
+    let obj = {};
 
     obj.status = status;
 
@@ -34,17 +34,17 @@ function getSpec(ref, status) {
         obj.editorDraft = ref['ED'][0].$["rdf:resource"];
     }
 
-    var deliveredBy = ref['org:deliveredBy'];
+    let deliveredBy = ref['org:deliveredBy'];
     if (deliveredBy !== undefined) {
         obj.deliveredBy = deliveredBy[0]["contact:homePage"][0].$["rdf:resource"];
     }
 
     obj.title = ref['dc:title'][0];
-    var obsolete = ref['doc:obsoletes'];
+    let obsolete = ref['doc:obsoletes'];
     if (obsolete !== undefined) {
         obj.obsoletes = obsolete[0].$["rdf:resource"];
     }
-    var editor = ref['editor'];
+    let editor = ref['editor'];
     if (editor !== undefined) {
         obj.editors = editor.map(getEditor);
     }
@@ -61,16 +61,16 @@ function getSpec(ref, status) {
     return obj;
 }
 
-var W3C_RDF_HEADERS = "/tmp/tr.headers.json";
+let W3C_RDF_HEADERS = "/tmp/tr.headers.json";
 
 function fetchRDF() {
     return io.readJSON(W3C_RDF_HEADERS)
       .then(function (data) {
-        var previous_headers = data;
-        var previous_etag = previous_headers.etag;
+        let previous_headers = data;
+        let previous_etag = previous_headers.etag;
         return io.head(RDF_FILE).then(function (res) {
-            var new_headers = res.headers;
-            var new_etag = new_headers.etag;
+            let new_headers = res.headers;
+            let new_etag = new_headers.etag;
             if (previous_etag !== new_etag) {
               return true;
             } else {
@@ -99,8 +99,8 @@ function getSpecs() {
                         if (err) {
                             reject(err);
                         } else {
-                            var specs = [];
-                            var refs = result['rdf:RDF'];
+                            let specs = [];
+                            let refs = result['rdf:RDF'];
                             Object.keys(STATUSES).forEach(function (k) {
                                 if (refs[k] !== undefined) {
                                   refs[k].forEach(function (s) {

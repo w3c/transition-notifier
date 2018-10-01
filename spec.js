@@ -1,6 +1,6 @@
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
-var io = require("io-promise");
+const io = require("io-promise");
 
 function norm(str) {
   if (!str) return "";
@@ -115,7 +115,7 @@ function getSOTD(doc) {
 function loadSpecification(href) {
   return io.fetch(href).then(res => res.text().then(data => new JSDOM(data).window.document)
     .then(document => {
-    var spec = {};
+    let spec = {};
     spec.href = href;
     spec.title = norm(document.querySelector("title").textContent);
     spec.abstract = toText(getAbstract(document));

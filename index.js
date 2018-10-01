@@ -1,12 +1,12 @@
-var io = require("io-promise");
-var loadSpecification = require("./spec");
-var notify = require("./notify").notify;
-var W3C_TR = require("./w3c_tr").specs;
+const io = require("io-promise");
+const loadSpecification = require("./spec");
+const notify = require("./notify");
+const W3C_TR = require("./w3c_tr").specs;
 
-var SpecManager = function (bibrefs) {
+let SpecManager = function (bibrefs) {
   function filterSpecref(entries) {
-    var specs = [];
-    var key, entry;
+    let specs = [];
+    let key, entry;
     // we filter out lots of useless references
     for (key in entries) {
       entry = entries[key];
@@ -21,8 +21,8 @@ var SpecManager = function (bibrefs) {
   }
 
   function filterLatest(entries) {
-    var specs = {};
-    var key;
+    let specs = {};
+    let key;
     // we filter out lots of useless references
     for (key in entries) {
       specs[key] = entries[key];
@@ -35,7 +35,7 @@ var SpecManager = function (bibrefs) {
 };
 
 SpecManager.prototype.hasSpec = function (href) {
-  for (var i = this.entries.length - 1; i >= 0; i--) {
+  for (let i = this.entries.length - 1; i >= 0; i--) {
     if (this.entries[i].href === href) {
       return true;
     }
@@ -48,8 +48,8 @@ SpecManager.prototype.getLatest = function (versionOf) {
 };
 
 
-var SPEC_LIST_FILE = "/home/node/specref.json";
-var w3c_specs = null;
+const SPEC_LIST_FILE = "/home/node/specref.json";
+let w3c_specs = null;
 
 function fetchBibrefs() {
   return W3C_TR().then(function (entries) {
@@ -59,7 +59,7 @@ function fetchBibrefs() {
 
 function notifier(spec) {
   loadSpecification(spec).then(function (specData) {
-    var obj = {
+    let obj = {
       href: spec.href,
       status: spec.status,
       date: spec.date,
@@ -96,7 +96,7 @@ function init() {
 }
 
 function loop() {
-  var saved;
+  let saved;
 
   //  io.readJSON("specref-v2.json").then(function (bibrefs) {
   fetchBibrefs().then(function (bibrefs) {
@@ -108,7 +108,7 @@ function loop() {
     return specs;
   }).then(function (specs) {
     // let's find out how many are new entries
-    var new_specs = [];
+    let new_specs = [];
     specs.entries.forEach(function (spec) {
       if (!w3c_specs.hasSpec(spec.href)) {
         new_specs.push(spec);
@@ -117,10 +117,10 @@ function loop() {
     return new_specs;
   }).then(function (specs) {
     // establishes the list of new entries
-    var notifications = [];
+    let notifications = [];
     // @@ is this really or can it be combined with the previous then?!?
     specs.forEach(function (spec) {
-      var latest = w3c_specs.getLatest(spec.versionOf);
+      let latest = w3c_specs.getLatest(spec.versionOf);
       spec.previousVersion = latest;
       notifications.push(spec);
     });
@@ -158,5 +158,9 @@ init().then(function () {
   console.log(err);
   console.log(err.stack);
 }).then(function () {
-  console.log("Initialized %d entries", w3c_specs.entries.length);
+  if (w3c_specs && w3c_specs.entries) {
+    console.log("Initialized %d entries", w3c_specs.entries.length);
+  } else {
+    console.error("Something went wrong...");
+  }
 });

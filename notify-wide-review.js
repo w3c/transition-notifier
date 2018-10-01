@@ -1,6 +1,6 @@
 "use strict";
 const nodemailer = require('nodemailer');
-var handlebars = require('handlebars');
+const handlebars = require('handlebars');
 
 
 let transporter = nodemailer.createTransport({
@@ -9,7 +9,7 @@ let transporter = nodemailer.createTransport({
     path: '/usr/sbin/sendmail',
 });
 
-var MAILING_LIST, SENDER_EMAIL;
+let MAILING_LIST, SENDER_EMAIL;
 
 if (process.env.NODE_ENV == 'production') {
   MAILING_LIST = "public-review-announce@w3.org";
@@ -19,15 +19,15 @@ if (process.env.NODE_ENV == 'production') {
   SENDER_EMAIL = "plh@w3.org";
 }
 
-var bodyTemplate = handlebars.compile("{{ title }}\n\n{{ href }}{{ feedbackDate }}\n\nAbstract\n\n{{ abstract }}\n\nStatus of the Document\n\n{{ sotd }}");
+const bodyTemplate = handlebars.compile("{{ title }}\n\n{{ href }}{{ feedbackDate }}\n\nAbstract\n\n{{ abstract }}\n\nStatus of the Document\n\n{{ sotd }}");
 
 function notifyWideReview(spec) {
   console.log("[Email] Notification: " + spec.href);
-  var status = spec.status;
+  let status = spec.status;
   if (spec.obsoletes === undefined) {
     status = "FPWD";
   }
-  var context = {
+  let context = {
     title: spec.title,
     date: spec.date,
     href: spec.href,
@@ -78,4 +78,4 @@ function sendError(error) {
 
 }
 
-exports.notifyWideReview = notifyWideReview;
+module.exports = notifyWideReview;

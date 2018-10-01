@@ -1,6 +1,6 @@
 "use strict";
 
-var notifyWideReview = require("./notify-wide-review").notifyWideReview;
+const notifyWideReview = require("./notify-wide-review");
 
 function notify(spec) {
   console.log("New document: " + spec.href);
@@ -18,4 +18,4 @@ function notify(spec) {
   }
 }
 
-exports.notify = notify;
+module.exports = notify;
