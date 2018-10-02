@@ -111,11 +111,11 @@ function getSOTD(doc) {
   }
 }
 
-function loadSpecification(href) {
-  return io.fetch(href).then(res => res.text().then(data => new JSDOM(data).window.document)
+function loadSpecification(s) {
+  return io.fetch(s.href).then(res => res.text().then(data => new JSDOM(data).window.document)
     .then(document => {
     let spec = {};
-    spec.href = href;
+    spec.href = s.href;
     spec.title = norm(document.querySelector("title").textContent);
     spec.abstract = toText(getAbstract(document));
     spec.sotd = toText(getSOTD(document));
