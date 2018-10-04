@@ -13,7 +13,7 @@ let MAILING_LIST, SENDER_EMAIL;
 
 if (process.env.NODE_ENV == 'production') {
   MAILING_LIST = "public-review-announce@w3.org";
-  SENDER_EMAIL = "notifier@aries.w3.org";
+  SENDER_EMAIL = "sysbot+notifier@w3.org";
 } else {
   MAILING_LIST = "plh@w3.org";
   SENDER_EMAIL = "plh@w3.org";
@@ -62,6 +62,7 @@ function notifyWideReview(spec) {
 }
 
 function sendError(error) {
+  // if things go wrong, please call the maintainer
   let mailOptions = {
     from: "Notifier <" + SENDER_EMAIL + ">",
     to: "plh@w3.org",
