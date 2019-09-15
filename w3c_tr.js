@@ -1,7 +1,7 @@
 const io = require('io-promise'),
     xml2js = require('xml2js');
 
-const RDF_FILE = "http://www.w3.org/2002/01/tr-automation/tr.rdf";
+const RDF_FILE = "https://www.w3.org/2002/01/tr-automation/tr.rdf";
 
 const STATUSES = {
     'NOTE': 'NOTE',
