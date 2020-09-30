@@ -26,6 +26,14 @@ function getSpec(ref, status) {
 
     obj.href = ref.$['rdf:about'];
 
+    if (status === "CR") {
+        if (obj.href.match(/https:\/\/www.w3.org\/TR\/[0-9]+\/CRD/)) {
+            obj.status = status = "CRD";
+        } else if (obj.href.match(/https:\/\/www.w3.org\/TR\/[0-9]+\/CRS/)) {
+            obj.status = status = "CRS";
+        }
+    }
+
     obj.date = ref['dc:date'][0];
 
     obj.versionOf = ref['doc:versionOf'][0].$["rdf:resource"];
@@ -52,8 +60,16 @@ function getSpec(ref, status) {
     if (status === "LCWD") {
         obj.feedbackDate = ref.lastCallFeedBackDue[0];
     }
-    if (status === "CR") {
-        obj.feedbackDate = ref.implementationFeedbackDue[0];
+    if (status === "CRD" || status === "CRS") {
+        const f = ref.implementationFeedbackDue[0];
+        if (f) {
+          const i = new Date(f);
+          const today = new Date();
+          if (f > today) {
+            obj.feedbackDate = ref.implementationFeedbackDue[0];
+          }
+        }
+
     }
 
     // obj.ref = ref;

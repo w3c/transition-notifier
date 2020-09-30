@@ -5,7 +5,7 @@ const notifyWideReview = require("./notify-wide-review");
 function notify(spec) {
   console.log("New document: " + spec.href);
 
-  if (spec.status === "WD") {
+  if (spec.status === "WD" || spec.status === "CRD") {
     if (spec.obsoletes === undefined
       || spec.sotd.indexOf("wide review") !== -1) {
       notifyWideReview(spec);
