@@ -63,9 +63,9 @@ function getSpec(ref, status) {
     if (status === "CRD" || status === "CRS") {
         const f = ref.implementationFeedbackDue[0];
         if (f) {
-          const i = new Date(f);
+          const idate = new Date(f);
           const today = new Date();
-          if (f > today) {
+          if (idate > today) {
             obj.feedbackDate = ref.implementationFeedbackDue[0];
           }
         }
