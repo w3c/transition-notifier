@@ -19,7 +19,7 @@ if (process.env.NODE_ENV == 'production') {
   SENDER_EMAIL = "plh@w3.org";
 }
 
-const bodyTemplate = handlebars.compile("{{ title }}\n\n{{ href }}{{ feedbackDate }}\n\nAbstract\n\n{{ abstract }}\n\nStatus of the Document\n\n{{ sotd }}");
+const bodyTemplate = handlebars.compile("{{ title }}\n\n{{ href }}{{ feedbackDate }}\n\nAbstract\n\n{{ abstract }}\n\nStatus of the Document\n\n{{ sotd }}\n\n-- \nThis report was generated using https://github.com/w3c/transition-notifier");
 
 function notifyWideReview(spec) {
   console.log("[Email] Notification: " + spec.href);
