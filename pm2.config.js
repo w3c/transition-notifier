@@ -6,7 +6,7 @@ module.exports = {
   apps : [
     {
       name      : 'transition-notifier',
-      script    : 'serve.js',
+      script    : 'index.js',
       env: {
         NODE_ENV: 'production'
       },
