@@ -1,7 +1,7 @@
 "use strict";
 const nodemailer = require('nodemailer');
 const handlebars = require('handlebars');
-
+const config     = require('./lib/config.js');
 
 let transporter = nodemailer.createTransport({
     sendmail: true,
@@ -11,7 +11,7 @@ let transporter = nodemailer.createTransport({
 
 let MAILING_LIST, SENDER_EMAIL;
 
-if (process.env.NODE_ENV == 'production') {
+if (config.env == 'production') {
   MAILING_LIST = "public-review-announce@w3.org";
   SENDER_EMAIL = "sysbot+notifier@w3.org";
 } else {
