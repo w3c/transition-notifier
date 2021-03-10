@@ -73,7 +73,7 @@ function notifyWideReview(spec) {
         sendError(error); // notify plh
         return monitor.error(error);
       }
-      monitor.log('Message sent: %s', info.messageId);
+      monitor.log(`Message sent: ${info.messageId}`);
     });
   }
 

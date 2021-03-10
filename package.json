@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/plehegar/transition-notifier",
   "dependencies": {
-    "handlebars": "^4.0.12",
+    "handlebars": "^4.7.7",
     "jsdom": "^12.1.0",
     "node-fetch": "^2.6.1",
     "nodemailer": "^4.6.8"
