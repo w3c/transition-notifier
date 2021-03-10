@@ -101,7 +101,7 @@ function loop() {
   setTimeout(loop, 900000); //every 15 minutes
 }
 
-function task() {
+function start() {
   init().then(function () {
     loop();
   }).catch(function (err) {
@@ -116,4 +116,5 @@ function task() {
   });
 }
 
-module.exports = task;
+module.exports = { start: start, nudge: loop };
+
