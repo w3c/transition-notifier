@@ -74,7 +74,7 @@ function loop() {
         new_specs.push(spec);
       }
     });
-    // w3c_specs = specs;
+    w3c_specs = specs;
     return new_specs;
   }).then(function (specs) {
     // ok, we notify now
