@@ -2,6 +2,7 @@
 const nodemailer = require('nodemailer');
 const handlebars = require('handlebars');
 const config     = require('./lib/config.js');
+const monitor    = require("./lib/monitor.js");
 
 let transporter = nodemailer.createTransport({
     sendmail: true,
@@ -19,26 +20,41 @@ if (config.env == 'production') {
   SENDER_EMAIL = "plh@w3.org";
 }
 
-const bodyTemplate = handlebars.compile("{{ title }}\n\n{{ href }}{{ feedbackDate }}\n\nAbstract\n\n{{ abstract }}\n\nStatus of the Document\n\n{{ sotd }}"
+const bodyTemplate = handlebars.compile("{{ title }}\n\n{{ href }}{{ feedbackDate }}\n\nPublished by{{ deliverer }}\n\nAbstract\n\n{{ abstract }}\n\nStatus of the Document\n\n{{ sotd }}"
           + "\n\n-- \nThis report was automatically generated using https://github.com/w3c/transition-notifier");
 
+          // format a Date, "Aug 21, 2019"
+function formatDate(date) {
+  // date is a date object
+  const options = { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' };
+  return date.toLocaleDateString('en-US', options);
+}
+
 function notifyWideReview(spec) {
-  console.log("[Email] Notification: " + spec.href);
+  monitor.log("[Email] Notification: " + spec.uri);
   let status = spec.status;
-  if (spec.obsoletes === undefined) {
-    status = "FPWD";
+  if (spec._links["predecessor-version"] === undefined) {
+    status = "First Public Working Draft";
   }
   let context = {
     title: spec.title,
-    date: spec.date,
-    href: spec.href,
+    date: formatDate(new Date(spec.date)),
+    href: spec.uri,
     status: status,
     sotd: spec.sotd,
     abstract: spec.abstract,
-    feedbackDate: (spec.feedbackDate === undefined) ?
-      "" : "\n\nfeedback due by: " + spec.feedbackDate,
+    deliverer: "unknown",
+    feedbackDate: (spec['implementation-feedback-due'] === undefined) ?
+      "" : "\n\nfeedback due by: " + formatDate(new Date(spec['implementation-feedback-due'])),
     timestamp: Date.now()
   };
+  if (spec.deliverers) {
+    let text = "";
+    spec.deliverers.forEach(d => {
+      text += `\n ${d.name}`;
+    })
+    context.deliverer = text;
+  }
   if (spec.sotd.indexOf("wide review") !== -1) {
     context.cfwd = " (Call for Wide Review)";
   } else {
@@ -51,14 +67,15 @@ function notifyWideReview(spec) {
     subject: context.status+": "+context.title+context.cfwd,
     text: bodyTemplate(context)
   };
-
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      sendError(error); // notify plh
-      return console.error(error);
-    }
-    console.log('Message sent: %s', info.messageId);
-  });
+  if (!config.debug) {
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        sendError(error); // notify plh
+        return monitor.error(error);
+      }
+      monitor.log('Message sent: %s', info.messageId);
+    });
+  }
 
 }
 
@@ -73,9 +90,9 @@ function sendError(error) {
 
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
-        return console.error(JSON.stringify(error));
+        return monitor.error(JSON.stringify(error));
     }
-    console.log('Error message sent: %s', info.messageId);
+    monitor.log('Error message sent: %s', info.messageId);
   });
 
 }

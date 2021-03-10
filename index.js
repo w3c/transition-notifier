@@ -1,7 +1,8 @@
-const io = require("io-promise");
+const fs = require('fs/promises');
 const loadSpecification = require("./spec");
 const notify = require("./notify");
 const W3C_TR = require("./w3c_tr");
+const monitor = require("./lib/monitor.js");
 
 let SpecManager = function (bibrefs) {
   function filterSpecref(entries) {
@@ -10,9 +11,9 @@ let SpecManager = function (bibrefs) {
     // we filter out lots of useless references
     for (key in entries) {
       entry = entries[key];
-      if (entry.versionOf !== undefined &&
-        entry.status !== "NOTE" &&
-        entry.deliveredBy !== undefined &&
+      if (entry.href !== undefined &&
+        entry.status !== "Group Note" && entry.status !== "Retired" &&
+        entry.status !== "Proposed Recommendation" && entry.status !== "Recommendation" &&
         entry.status !== undefined) {
         specs.push(entry);
       }
@@ -20,64 +21,28 @@ let SpecManager = function (bibrefs) {
     return specs;
   }
 
-  function filterLatest(entries) {
-    let specs = {};
-    let key;
-    // we filter out lots of useless references
-    for (key in entries) {
-      specs[key] = entries[key];
-    }
-    return specs;
-  }
-
   this.entries = filterSpecref(bibrefs);
-  this.latestVersions = filterLatest(this.entries);
 };
 
 SpecManager.prototype.hasSpec = function (href) {
-  for (let i = this.entries.length - 1; i >= 0; i--) {
-    if (this.entries[i].href === href) {
-      return true;
-    }
-  }
-  return false;
+  return this.entries.find(s => s.href === href);
 };
 
-SpecManager.prototype.getLatest = function (versionOf) {
-  return this.latestVersions[versionOf];
-};
-
-
-const SPEC_LIST_FILE = "/home/node/specref.json";
+const SPEC_LIST_FILE = "./specref.json";
 let w3c_specs = null;
 
 function fetchBibrefs() {
   return W3C_TR().then(function (entries) {
-    return io.save(SPEC_LIST_FILE, entries);
+    return fs.writeFile(SPEC_LIST_FILE, JSON.stringify(entries, null, " ")).then(() => entries);
   });
 }
 
 function notifier(spec) {
-  loadSpecification(spec).then(function (specData) {
-    let obj = {
-      href: spec.href,
-      status: spec.status,
-      date: spec.date,
-      title: spec.title,
-      editors: spec.editors,
-      obsoletes: spec.obsoletes,
-      feedbackDate: spec.feedbackDate,
-      sotd: specData.sotd,
-      abstract: specData.abstract,
-      deliveredBy: spec.deliveredBy,
-      editorDraft: spec.editorDraft,
-      versionOf: spec.versionOf
-    };
-    notify(obj);
+  loadSpecification(spec).then(function (s) {
+    notify(s);
   }).catch(function (err) {
-    console.error("Failure to notify");
-    console.error(err);
-    console.error(err.stack);
+    monitor.error("Failure to notify");
+    monitor.error(err);
   });
 
   return;
@@ -86,7 +51,7 @@ function notifier(spec) {
 function init() {
   // we're booting the notifier by reusing the previous entries or fetching new
   // ones if needed
-  return io.readJSON(SPEC_LIST_FILE)
+  return fs.readFile(SPEC_LIST_FILE).then(JSON.parse)
     .catch(function (err) {
     return fetchBibrefs();
   }).then(function (bibrefs) {
@@ -96,17 +61,12 @@ function init() {
 }
 
 function loop() {
-  let saved;
-
-  //  io.readJSON("specref-v2.json").then(function (bibrefs) {
-  fetchBibrefs().then(function (bibrefs) {
-    return new SpecManager(bibrefs);
-  }).then(function (specs) {
+  //fs.readFile("specref-v2.json").then(JSON.parse)
+  fetchBibrefs()
+  .then(bibrefs => new SpecManager(bibrefs))
+  .then(function (specs) {
     // those are new entries
-    console.log("Fetched %d entries", specs.entries.length);
-    saved = specs;
-    return specs;
-  }).then(function (specs) {
+    monitor.log(`Fetched ${specs.entries.length} entries`);
     // let's find out how many are new entries
     let new_specs = [];
     specs.entries.forEach(function (spec) {
@@ -114,24 +74,13 @@ function loop() {
         new_specs.push(spec);
       }
     });
+    // w3c_specs = specs;
     return new_specs;
-  }).then(function (specs) {
-    // establishes the list of new entries
-    let notifications = [];
-    // @@ is this really or can it be combined with the previous then?!?
-    specs.forEach(function (spec) {
-      let latest = w3c_specs.getLatest(spec.versionOf);
-      spec.previousVersion = latest;
-      notifications.push(spec);
-    });
-    // replace the previous list of specs with the new one
-    w3c_specs = saved;
-    return notifications;
   }).then(function (specs) {
     // ok, we notify now
     if (specs.length > 50) {
       // this is suspicious...
-      console.error("WARNING: TOO MANY NOTIFICATIONS. IGNORING.");
+      monitor.error(`WARNING: TOO MANY (${specs.length}) NOTIFICATIONS. IGNORING.`);
     } else {
       specs.forEach(function (spec) {
         notifier(spec);
@@ -140,11 +89,11 @@ function loop() {
     return specs;
   }).then(function (specs) {
     // not really needed
-    return io.save("entries.json", specs);
+    return fs.writeFile("entries.json", JSON.stringify(specs, null, " "));
   }).catch(function (err) {
     if (err.status !== "same") {
-      console.error(err);
-      console.error(err.stack);
+      monitor.error(err);
+      monitor.error(err.stack);
     }
   });
 
@@ -154,13 +103,13 @@ function loop() {
 init().then(function () {
   loop();
 }).catch(function (err) {
-  console.error("Error during initialization");
-  console.error(err);
-  console.error(err.stack);
+  monitor.error("Error during initialization");
+  monitor.error(err);
+  monitor.error(err.stack);
 }).then(function () {
   if (w3c_specs && w3c_specs.entries) {
-    console.log("Initialized %d entries", w3c_specs.entries.length);
+    monitor.log(`Initialized ${w3c_specs.entries.length} entries`);
   } else {
-    console.error("Something went wrong...");
+    monitor.error("Something went wrong...");
   }
 });

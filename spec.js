@@ -1,6 +1,8 @@
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
-const io = require("io-promise");
+const fetch = require("node-fetch");
+const monitor = require("./lib/monitor.js");
+const utils = require("./lib/utils.js");
 
 function norm(str) {
   if (!str) return "";
@@ -68,8 +70,8 @@ function getSection(document, titleRegExp) {
     }
   })
   if (!startH2) {
-    throw new Error("Can't find " + titleRegExp);
-    // return div;
+    monitor.error(`Can't find ${titleRegExp}`);
+    return div;
   }
 
   let siblings = getSiblings(startH2.nextElementSibling);
@@ -111,12 +113,21 @@ function getSOTD(doc) {
   }
 }
 
-function loadSpecification(s) {
-  return io.fetch(s.href).then(res => res.text().then(data => new JSDOM(data).window.document)
+async function loadSpecification(s) {
+  const spec = await utils.fetchW3C(s.href);
+  if (spec._links.deliverers) {
+    spec.deliverers = await utils.fetchW3C(spec._links.deliverers.href);
+  }
+  if (spec._links["predecessor-version"]) {
+    spec.predecessor = await utils.fetchW3C(spec._links["predecessor-version"].href);
+  }
+
+  return fetch(spec.uri).then(res => res.text().then(data => new JSDOM(data).window.document)
     .then(document => {
-    let spec = {};
-    spec.href = s.href;
-    spec.title = norm(document.querySelector("title").textContent);
+    let title = norm(document.querySelector("title").textContent);
+    if (title !== spec.title) {
+      monitor.warn(`Title mismatch: "${spec.title}" !== "${title}"`)
+    }
     spec.abstract = toText(getAbstract(document));
     spec.sotd = toText(getSOTD(document));
     return spec;

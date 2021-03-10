@@ -18,9 +18,8 @@
   "homepage": "https://github.com/plehegar/transition-notifier",
   "dependencies": {
     "handlebars": "^4.0.12",
-    "io-promise": "^1.0.1",
     "jsdom": "^12.1.0",
-    "nodemailer": "^4.6.8",
-    "xml2js": "^0.4.19"
+    "node-fetch": "^2.6.1",
+    "nodemailer": "^4.6.8"
   }
 }
