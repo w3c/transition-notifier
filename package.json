@@ -4,7 +4,7 @@
   "description": "Notifier for public-review-announce",
   "main": "index.js",
   "scripts": {
-    "test": "node tests/index.js"
+    "start": "node index.js"
   },
   "repository": {
     "type": "git",
@@ -17,6 +17,8 @@
   },
   "homepage": "https://github.com/plehegar/transition-notifier",
   "dependencies": {
+    "compression": "^1.7.4",
+    "express": "^4.17.1",
     "handlebars": "^4.7.7",
     "jsdom": "^12.1.0",
     "node-fetch": "^2.6.1",

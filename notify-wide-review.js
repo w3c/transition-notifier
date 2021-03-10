@@ -75,6 +75,8 @@ function notifyWideReview(spec) {
       }
       monitor.log(`Message sent: ${info.messageId}`);
     });
+  } else {
+    monitor.log(`in DEBUG mode. Not sending messages`);
   }
 
 }

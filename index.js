@@ -1,115 +1,49 @@
-const fs = require('fs/promises');
-const loadSpecification = require("./spec");
-const notify = require("./notify");
-const W3C_TR = require("./w3c_tr");
-const monitor = require("./lib/monitor.js");
+/* eslint-env node */
 
-let SpecManager = function (bibrefs) {
-  function filterSpecref(entries) {
-    let specs = [];
-    let key, entry;
-    // we filter out lots of useless references
-    for (key in entries) {
-      entry = entries[key];
-      if (entry.href !== undefined &&
-        entry.status !== "Group Note" && entry.status !== "Retired" &&
-        entry.status !== "Proposed Recommendation" && entry.status !== "Recommendation" &&
-        entry.status !== undefined) {
-        specs.push(entry);
-      }
-    }
-    return specs;
-  }
+"use strict";
 
-  this.entries = filterSpecref(bibrefs);
-};
+const t0 = Date.now();
 
-SpecManager.prototype.hasSpec = function (href) {
-  return this.entries.find(s => s.href === href);
-};
+const express = require("express");
+const compression = require("compression");
+const path = require("path");
+const task = require("./loop.js");
+const config = require("./lib/config.js");
+const monitor = require('./lib/monitor.js');
 
-const SPEC_LIST_FILE = "/home/node/specref.json";
-let w3c_specs = null;
+const app = express();
 
-function fetchBibrefs() {
-  return W3C_TR().then(function (entries) {
-    return fs.writeFile(SPEC_LIST_FILE, JSON.stringify(entries, null, " ")).then(() => entries);
+app.set('x-powered-by', false);
+app.set('strict routing', true);
+app.enable('trust proxy');
+
+monitor.setName("Transition notifier");
+monitor.install(app, config);
+
+app.use(compression());
+
+app.use("/doc", express.static(path.resolve(__dirname, "docs")));
+
+if (!config.debug) {
+  process.on('unhandledRejection', error => {
+    console.log("-----------------------------");
+    console.log('unhandledRejection', error.message);
+    console.log(error);
+    console.log("-----------------------------");
   });
 }
 
-function notifier(spec) {
-  loadSpecification(spec).then(function (s) {
-    notify(s);
-  }).catch(function (err) {
-    monitor.error("Failure to notify");
-    monitor.error(err);
-  });
-
+if (!config.checkOptions("host", "port", "env")) {
+  console.error("Improper configuration. Not Starting");
   return;
 }
 
-function init() {
-  // we're booting the notifier by reusing the previous entries or fetching new
-  // ones if needed
-  return fs.readFile(SPEC_LIST_FILE).then(JSON.parse)
-    .catch(function (err) {
-    return fetchBibrefs();
-  }).then(function (bibrefs) {
-    w3c_specs = new SpecManager(bibrefs); // if undefined, this will throw
-    return w3c_specs;
-  });
-}
-
-function loop() {
-  //fs.readFile("specref-v2.json").then(JSON.parse)
-  fetchBibrefs()
-  .then(bibrefs => new SpecManager(bibrefs))
-  .then(function (specs) {
-    // those are new entries
-    monitor.log(`Fetched ${specs.entries.length} entries`);
-    // let's find out how many are new entries
-    let new_specs = [];
-    specs.entries.forEach(function (spec) {
-      if (!w3c_specs.hasSpec(spec.href)) {
-        new_specs.push(spec);
-      }
-    });
-    w3c_specs = specs;
-    return new_specs;
-  }).then(function (specs) {
-    // ok, we notify now
-    if (specs.length > 50) {
-      // this is suspicious...
-      monitor.error(`WARNING: TOO MANY (${specs.length}) NOTIFICATIONS. IGNORING.`);
-    } else {
-      specs.forEach(function (spec) {
-        notifier(spec);
-      });
-    }
-    return specs;
-  }).then(function (specs) {
-    // not really needed
-    return fs.writeFile("entries.json", JSON.stringify(specs, null, " "));
-  }).catch(function (err) {
-    if (err.status !== "same") {
-      monitor.error(err);
-      monitor.error(err.stack);
-    }
-  });
-
-  setTimeout(loop, 900000); //every 15 minutes
-}
-
-init().then(function () {
-  loop();
-}).catch(function (err) {
-  monitor.error("Error during initialization");
-  monitor.error(err);
-  monitor.error(err.stack);
-}).then(function () {
-  if (w3c_specs && w3c_specs.entries) {
-    monitor.log(`Initialized ${w3c_specs.entries.length} entries`);
-  } else {
-    monitor.error("Something went wrong...");
+app.listen(config.port, () => {
+  console.log(`Server started in ${Date.now() - t0}ms at http://${config.host}:${config.port}/`);
+  if (!config.debug && config.env != "production") {
+    console.warn("WARNING: 'export NODE_ENV=production' is missing");
+    console.warn("See http://expressjs.com/en/advanced/best-practice-performance.html#set-node_env-to-production");
   }
 });
+
+task();

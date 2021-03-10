@@ -8,7 +8,8 @@ module.exports = {
       name      : 'transition-notifier',
       script    : 'index.js',
       env: {
-        NODE_ENV: 'production'
+        NODE_ENV: 'production',
+        PORT:     '8070'
       },
       error_file : "/var/log/nodejs/transition-notifier.err",
       out_file : "/var/log/nodejs/transition-notifier.log",
