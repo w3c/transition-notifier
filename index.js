@@ -28,7 +28,7 @@ SpecManager.prototype.hasSpec = function (href) {
   return this.entries.find(s => s.href === href);
 };
 
-const SPEC_LIST_FILE = "./specref.json";
+const SPEC_LIST_FILE = "/home/node/specref.json";
 let w3c_specs = null;
 
 function fetchBibrefs() {
