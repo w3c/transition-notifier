@@ -4,6 +4,7 @@
 
 const t0 = Date.now();
 
+const fs = require('fs/promises');
 const express = require("express");
 const compression = require("compression");
 const path = require("path");
