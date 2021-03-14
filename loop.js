@@ -34,7 +34,13 @@ let w3c_specs = null;
 
 function fetchBibrefs() {
   return W3C_TR().then(function (entries) {
-    return fs.writeFile(SPEC_LIST_FILE, JSON.stringify(entries, null, " ")).then(() => entries);
+    let end;
+    if (config.debug) {
+      end = entries;
+    } else {
+      end = fs.writeFile(SPEC_LIST_FILE, JSON.stringify(entries, null, " ")).then(() => entries);
+    }
+    return end;
   });
 }
 
@@ -62,8 +68,13 @@ function init() {
 }
 
 function loop() {
-  //fs.readFile("specref-v2.json").then(JSON.parse)
-  fetchBibrefs()
+  let start;
+  if (config.debug) {
+    start = fs.readFile("specref-v2.json").then(JSON.parse);
+  } else {
+    start = fetchBibrefs()
+  }
+  start
   .then(bibrefs => new SpecManager(bibrefs))
   .then(function (specs) {
     // those are new entries
