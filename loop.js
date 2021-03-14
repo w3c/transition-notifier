@@ -4,6 +4,7 @@ const notify = require("./notify");
 const W3C_TR = require("./w3c_tr");
 const monitor = require("./lib/monitor.js");
 const config = require("./lib/config.js");
+const { sendError } = require("./notify-wide-review");
 
 let SpecManager = function (bibrefs) {
   function filterSpecref(entries) {
@@ -90,9 +91,10 @@ function loop() {
     return new_specs;
   }).then(function (specs) {
     // ok, we notify now
-    if (specs.length > 50) {
+    if (specs.length > 15) {
       // this is suspicious...
-      monitor.error(`WARNING: TOO MANY (${specs.length}) NOTIFICATIONS. IGNORING.`);
+      monitor.error(`TOO MANY (${specs.length}) NOTIFICATIONS. IGNORING.`);
+      sendError(`TOO MANY (${specs.length}) NOTIFICATIONS.`)
     } else {
       specs.forEach(function (spec) {
         notifier(spec);
