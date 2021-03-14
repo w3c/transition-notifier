@@ -125,11 +125,16 @@ async function loadSpecification(s) {
   return fetch(spec.uri).then(res => res.text().then(data => new JSDOM(data).window.document)
     .then(document => {
     let title = norm(document.querySelector("title").textContent);
+    let proposedCorrections = document.querySelector(".proposed.correction");
+    let proposedAdditions = document.querySelector(".proposed.addition");
     if (title !== spec.title) {
       monitor.warn(`Title mismatch: "${spec.title}" !== "${title}"`)
     }
     spec.abstract = toText(getAbstract(document));
     spec.sotd = toText(getSOTD(document));
+
+    spec.proposedAdditions = !!proposedAdditions;
+    spec.proposedCorrections = !!proposedCorrections;
     return spec;
   }));
 }

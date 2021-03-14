@@ -1,6 +1,6 @@
 "use strict";
 
-const notifyWideReview = require("./notify-wide-review");
+const { notifyWideReview } = require("./notify-wide-review");
 const monitor = require("./lib/monitor.js");
 
 const ONEDAY = 60*60*24*1000; // one day in ms
@@ -18,7 +18,9 @@ function notify(spec) {
   if (spec.status === "Working Draft"
      || spec.status === "Candidate Recommendation Draft"
      || spec.status === "Candidate Recommendation Snapshot"
-     || spec.status === "Candidate Recommendation") {
+     || spec.status === "Candidate Recommendation"
+     || (spec.status === "Recommendation"
+         && (spec.proposedAdditions || spec.proposedCorrections))) {
     if (spec.status === "Candidate Recommendation"
         || spec._links["predecessor-version"] === undefined
         || spec.sotd.indexOf("wide review") !== -1) {
@@ -29,7 +31,7 @@ function notify(spec) {
     }
   } else if (spec.status === "Proposed Recommendation"
     || spec.status === "Recommendation") {
-    //ignore
+      monitor.log(`${spec.uri} is too late for wide review`);
   } else {
     notifyWideReview(spec);
   }

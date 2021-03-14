@@ -5,3 +5,4 @@ A quick 'n dirty publication notifier that sends an e-mail to the W3C's [public-
 * First Public Working Draft (FPWD)
 * Candidate Recommendation (CR)
 * Candidate Recommendation Draft and Snapshot and the Status of This Document (SOTD) section contains the words "wide review"
+* Recommendation with proposed corrections/additions

@@ -14,7 +14,7 @@ let SpecManager = function (bibrefs) {
       entry = entries[key];
       if (entry.href !== undefined &&
         entry.status !== "Group Note" && entry.status !== "Retired" &&
-        entry.status !== "Proposed Recommendation" && entry.status !== "Recommendation" &&
+        entry.status !== "Proposed Recommendation" &&
         entry.status !== undefined) {
         specs.push(entry);
       }

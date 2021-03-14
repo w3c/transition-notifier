@@ -20,7 +20,7 @@ if (config.env == 'production') {
   SENDER_EMAIL = "plh@w3.org";
 }
 
-const bodyTemplate = handlebars.compile("{{ title }}\n\n{{ href }}{{ feedbackDate }}\n\nPublished by{{ deliverer }}\n\nAbstract\n\n{{ abstract }}\n\nStatus of the Document\n\n{{ sotd }}"
+const bodyTemplate = handlebars.compile("{{ title }}\n\n{{ href }}{{ recChanges }}{{ feedbackDate }}\n\nPublished by{{ deliverer }}\n\nAbstract\n\n{{ abstract }}\n\nStatus of the Document\n\n{{ sotd }}"
           + "\n\n-- \nThis report was automatically generated using https://github.com/w3c/transition-notifier");
 
           // format a Date, "Aug 21, 2019"
@@ -46,6 +46,8 @@ function notifyWideReview(spec) {
     deliverer: "unknown",
     feedbackDate: (spec['implementation-feedback-due'] === undefined) ?
       "" : "\n\nfeedback due by: " + formatDate(new Date(spec['implementation-feedback-due'])),
+    recChanges:  (spec.status !== "Recommendation") ?
+      "" : "\n\nThis Recommendation contains proposed substantive chances (corrections and/or additions).",
     timestamp: Date.now()
   };
   if (spec.deliverers) {
@@ -99,4 +101,7 @@ function sendError(error) {
 
 }
 
-module.exports = notifyWideReview;
+module.exports = {
+  notifyWideReview: notifyWideReview,
+  sendError: sendError
+};
