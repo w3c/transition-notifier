@@ -3,13 +3,30 @@
 const notifyWideReview = require("./notify-wide-review");
 const monitor = require("./lib/monitor.js");
 
-function notify(spec) {
-  monitor.log("New document: " + spec.uri);
+const ONEDAY = 60*60*24*1000; // one day in ms
 
-  if (spec.status === "Working Draft" || spec.status === "Candidate Recommendation") {
-    if (spec._links["predecessor-version"] === undefined || spec.sotd.indexOf("wide review") !== -1) {
+function notify(spec) {
+  // first, check that we're not about to notify for something stale
+  const specDate = new Date(spec.date);
+  const now = new Date();
+  if (((now - specDate) / ONEDAY) > 60) {
+    // let's skip it
+    monitor.warn(`${spec.uri} too old for notification`);
+    return;
+  }
+
+  if (spec.status === "Working Draft"
+     || spec.status === "Candidate Recommendation Draft"
+     || spec.status === "Candidate Recommendation Snapshot"
+     || spec.status === "Candidate Recommendation") {
+    if (spec.status === "Candidate Recommendation"
+        || spec._links["predecessor-version"] === undefined
+        || spec.sotd.indexOf("wide review") !== -1) {
       notifyWideReview(spec);
-    } // else ignore
+    } else {
+      // else ignore
+      monitor.log(`${spec.uri} isn't up for wide review`);
+    }
   } else if (spec.status === "Proposed Recommendation"
     || spec.status === "Recommendation") {
     //ignore
