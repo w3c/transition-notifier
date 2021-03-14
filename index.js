@@ -11,7 +11,6 @@ const path = require("path");
 const loop = require("./loop.js");
 const config = require("./lib/config.js");
 const monitor = require('./lib/monitor.js');
-const fs = require('fs');
 
 const app = express();
 
