@@ -112,7 +112,7 @@ function loop() {
     }
   });
 
-  setTimeout(loop, 900000); //every 15 minutes
+  setTimeout(loop, 3600000); //every hour
 }
 
 function start() {
