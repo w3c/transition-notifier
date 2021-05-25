@@ -9,7 +9,7 @@ function notify(spec) {
   // first, check that we're not about to notify for something stale
   const specDate = new Date(spec.date);
   const now = new Date();
-  if (((now - specDate) / ONEDAY) > 60) {
+  if (((now - specDate) / ONEDAY) > 30) {
     // let's skip it
     monitor.warn(`${spec.uri} too old for notification`);
     return;
