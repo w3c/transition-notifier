@@ -108,6 +108,7 @@ function loop() {
     if (err.status !== "same") {
       monitor.error(err);
       monitor.error(err.stack);
+      sendError(err)
     }
   });
 
