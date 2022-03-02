@@ -66,7 +66,7 @@ function notifyWideReview(spec) {
   }
 
   let mailOptions = {
-    from: `${TOOLNAME} <${SENDER_EMAIL}>`,
+    from: `${TOOL_NAME} <${SENDER_EMAIL}>`,
     to: MAILING_LIST,
     subject: context.status+": "+context.title+context.cfwd,
     text: bodyTemplate(context)
@@ -87,9 +87,9 @@ function notifyWideReview(spec) {
 function sendError(error) {
   // if things go wrong, please call the maintainer
   let mailOptions = {
-    from: `${TOOLNAME} <${SENDER_EMAIL}>`,
+    from: `${TOOL_NAME} <${SENDER_EMAIL}>`,
     to: "plh@w3.org",
-    subject: `[tool] ${TOOLNAME}: ${error} (error)`,
+    subject: `[tool] ${TOOL_NAME}: ${error} (error)`,
     text: "You might want to look at this error object:\n" + JSON.stringify(error, null, " ")
   };
 
