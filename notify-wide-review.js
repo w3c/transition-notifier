@@ -4,6 +4,8 @@ const handlebars = require('handlebars');
 const config     = require('./lib/config.js');
 const monitor    = require("./lib/monitor.js");
 
+const TOOL_NAME = "publication-notifier";
+
 let transporter = nodemailer.createTransport({
     sendmail: true,
     newline: 'unix',
@@ -64,7 +66,7 @@ function notifyWideReview(spec) {
   }
 
   let mailOptions = {
-    from: "Notifier <" + SENDER_EMAIL + ">",
+    from: `${TOOLNAME} <${SENDER_EMAIL}>`,
     to: MAILING_LIST,
     subject: context.status+": "+context.title+context.cfwd,
     text: bodyTemplate(context)
@@ -80,24 +82,27 @@ function notifyWideReview(spec) {
   } else {
     monitor.log(`in DEBUG mode. Not sending messages`);
   }
-
 }
 
 function sendError(error) {
   // if things go wrong, please call the maintainer
   let mailOptions = {
-    from: "Notifier <" + SENDER_EMAIL + ">",
+    from: `${TOOLNAME} <${SENDER_EMAIL}>`,
     to: "plh@w3.org",
-    subject: "We've got an error on transition-notifier",
-    text: "You might want to look at " + JSON.stringify(error)
+    subject: `[tool] ${TOOLNAME}: ${error} (error)`,
+    text: "You might want to look at this error object:\n" + JSON.stringify(error, null, " ")
   };
 
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-        return monitor.error(JSON.stringify(error));
-    }
-    monitor.log('Error message sent: %s', info.messageId);
-  });
+  if (!config.debug) {
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+          return monitor.error(JSON.stringify(error));
+      }
+      monitor.log('Error message sent: %s', info.messageId);
+    });
+  } else {
+    monitor.log(`in DEBUG mode. Not sending messages`);
+  }
 
 }
 
