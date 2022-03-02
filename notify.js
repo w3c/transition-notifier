@@ -32,6 +32,12 @@ function notify(spec) {
   } else if (spec.status === "Proposed Recommendation"
     || spec.status === "Recommendation") {
       monitor.log(`${spec.uri} is too late for wide review`);
+  } else if (
+    (spec.status === "Draft Note"
+      || spec.status === "Draft Registry")
+     && (spec._links["predecessor-version"] === undefined
+         || spec.sotd.indexOf("wide review") !== -1)) {
+    notifyWideReview(spec);
   } else {
     notifyWideReview(spec);
   }
