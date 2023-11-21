@@ -49,7 +49,7 @@ function notifyWideReview(spec) {
     feedbackDate: (spec['implementation-feedback-due'] === undefined) ?
       "" : "\n\nfeedback due by: " + formatDate(new Date(spec['implementation-feedback-due'])),
     recChanges:  (spec.status !== "Recommendation") ?
-      "" : "\n\nThis Recommendation contains proposed substantive chances (corrections and/or additions).",
+      "" : "\n\nThis Recommendation contains proposed substantive changes (corrections and/or additions).",
     timestamp: Date.now()
   };
   if (spec.deliverers) {
