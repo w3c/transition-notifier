@@ -112,7 +112,7 @@ function loop() {
     }
   });
 
-  setTimeout(loop, 3600000); //every hour
+  setTimeout(loop, config.loop_interval * 60000); // min->ms
 }
 
 function start() {
