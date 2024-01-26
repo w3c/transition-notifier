@@ -3,8 +3,6 @@
 const { notifyWideReview } = require("./notify-wide-review");
 const monitor = require("./lib/monitor.js");
 
-const ONEDAY = 60*60*24*1000; // one day in ms
-
 function notify(spec) {
   if (spec.status === "Note"
      || spec.status === "Draft Note"

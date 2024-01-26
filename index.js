@@ -64,7 +64,7 @@ if (!config.debug) {
   });
 }
 
-if (!config.checkOptions("host", "port", "env")) {
+if (!config.checkOptions("host", "port", "env", "loop_interval")) {
   console.error("Improper configuration. Not Starting");
   return;
 }
