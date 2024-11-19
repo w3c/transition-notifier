@@ -65,7 +65,7 @@ if (!config.debug) {
 }
 
 // check that our default options are properly setup, or abort
-const missing = config.checkOptions("host", "port", "env");
+const missing = config.checkOptions("host", "port", "env", "loop_interval");
 if (missing) {
   console.error("Improper configuration. Not Starting");
   for (const opt of missing) {
