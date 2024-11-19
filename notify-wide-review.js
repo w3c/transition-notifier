@@ -1,8 +1,8 @@
 "use strict";
-const nodemailer = require('nodemailer');
-const handlebars = require('handlebars');
-const config     = require('./lib/config.js');
-const monitor    = require("./lib/monitor.js");
+import nodemailer from 'nodemailer';
+import handlebars from 'handlebars';
+import config     from './lib/config.js';
+import * as monitor    from "./lib/monitor.js";
 
 const TOOL_NAME = "publication-notifier";
 
@@ -32,6 +32,7 @@ function formatDate(date) {
   return date.toLocaleDateString('en-US', options);
 }
 
+export
 function notifyWideReview(spec) {
   monitor.log("[Email] Notification: " + spec.uri);
   let status = spec.status;
@@ -83,30 +84,3 @@ function notifyWideReview(spec) {
     monitor.log(`in DEBUG mode. Not sending messages`);
   }
 }
-
-function sendError(error) {
-  // if things go wrong, please call the maintainer
-  let mailOptions = {
-    from: `${TOOL_NAME} <${SENDER_EMAIL}>`,
-    to: "plh@w3.org",
-    subject: `[tool] ${TOOL_NAME}: ${error} (error)`,
-    text: "You might want to look at this error object:\n" + JSON.stringify(error, null, " ")
-  };
-
-  if (!config.debug) {
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-          return monitor.error(JSON.stringify(error));
-      }
-      monitor.log('Error message sent: %s', info.messageId);
-    });
-  } else {
-    monitor.log(`in DEBUG mode. Not sending messages`);
-  }
-
-}
-
-module.exports = {
-  notifyWideReview: notifyWideReview,
-  sendError: sendError
-};

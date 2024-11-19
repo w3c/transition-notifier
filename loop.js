@@ -1,10 +1,10 @@
-const fs = require('fs/promises');
-const loadSpecification = require("./spec");
-const notify = require("./notify");
-const W3C_TR = require("./w3c_tr");
-const monitor = require("./lib/monitor.js");
-const config = require("./lib/config.js");
-const { sendError } = require("./notify-wide-review");
+import fs from 'fs/promises';
+import loadSpecification from "./spec.js";
+import notify from "./notify.js";
+import W3C_TR from "./w3c_tr.js";
+import * as monitor from "./lib/monitor.js";
+import config from "./lib/config.js";
+import { sendError } from "./lib/email.js";
 
 let SpecManager = function (bibrefs) {
   function filterSpecref(entries) {
@@ -115,6 +115,10 @@ function loop() {
   setTimeout(loop, config.loop_interval * 60000); // min->ms
 }
 
+export
+const nudge = loop;
+
+export
 function start() {
   init().then(function () {
     loop();
@@ -129,6 +133,4 @@ function start() {
     }
   });
 }
-
-module.exports = { start: start, nudge: loop };
 

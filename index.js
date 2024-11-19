@@ -4,13 +4,13 @@
 
 const t0 = Date.now();
 
-const fs = require('fs/promises');
-const express = require("express");
-const compression = require("compression");
-const path = require("path");
-const loop = require("./loop.js");
-const config = require("./lib/config.js");
-const monitor = require('./lib/monitor.js');
+import fs from 'fs/promises';
+import express from "express";
+import compression from "compression";
+import path from "path";
+import * as loop from "./loop.js";
+import config from "./lib/config.js";
+import * as monitor from './lib/monitor.js';
 
 const app = express();
 
@@ -36,7 +36,7 @@ app.post("/nudge", function (req, res, next) {
 });
 
 app.get("/doc", function (req, res, next) {
-  fs.readFile(path.resolve(__dirname, "./docs/index.html")).then(data => {
+  fs.readFile(path.resolve(config.basedir, "./docs/index.html")).then(data => {
     res.set('Content-Type', 'text/html')
     res.send(data);
 
@@ -46,7 +46,7 @@ app.get("/doc", function (req, res, next) {
 });
 
 app.get("/doc/nudge", function (req, res, next) {
-  fs.readFile(path.resolve(__dirname, "./docs/nudge.html")).then(data => {
+  fs.readFile(path.resolve(config.basedir, "./docs/nudge.html")).then(data => {
     res.set('Content-Type', 'text/html');
     res.send(data);
 
@@ -64,13 +64,20 @@ if (!config.debug) {
   });
 }
 
-if (!config.checkOptions("host", "port", "env", "loop_interval")) {
+// check that our default options are properly setup, or abort
+const missing = config.checkOptions("host", "port", "env");
+if (missing) {
   console.error("Improper configuration. Not Starting");
-  return;
+  for (const opt of missing) {
+    console.error(`${opt} config option missing`);
+  }
+  process.abort();
 }
 
+/* eslint-disable no-console */
 app.listen(config.port, () => {
-  console.log(`Server started in ${Date.now() - t0}ms at http://${config.host}:${config.port}/`);
+  console.log(`Express server ${config.host} listening on port ${config.port} in ${config.env} mode`);
+  console.log("App started in", (Date.now() - t0) + "ms.");
   if (!config.debug && config.env != "production") {
     console.warn("WARNING: 'export NODE_ENV=production' is missing");
     console.warn("See http://expressjs.com/en/advanced/best-practice-performance.html#set-node_env-to-production");

@@ -3,8 +3,11 @@
   "version": "1.0.0",
   "description": "Notifier for public-review-announce",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "start": "node index.js"
+    "start": "node .",
+    "test": "node --test",
+    "coverage": "node --test --experimental-test-coverage"
   },
   "repository": {
     "type": "git",
@@ -19,9 +22,9 @@
   "dependencies": {
     "compression": "1.*.*",
     "express": "4.*.*",
+    "debug": "4.*.*",
     "handlebars": "4.*.*",
-    "jsdom": "24.*.*",
-    "node-fetch": "2.*.*",
+    "jsdom": "25.*.*",
     "nodemailer": "6.*.*"
   }
 }

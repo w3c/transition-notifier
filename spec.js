@@ -1,8 +1,7 @@
-const jsdom = require("jsdom");
+import jsdom  from "jsdom";
 const { JSDOM } = jsdom;
-const fetch = require("node-fetch");
-const monitor = require("./lib/monitor.js");
-const utils = require("./lib/utils.js");
+import * as monitor from "./lib/monitor.js";
+import * as utils from "./lib/utils.js";
 
 function norm(str) {
   if (!str) return "";
@@ -113,6 +112,7 @@ function getSOTD(doc) {
   }
 }
 
+export default
 async function loadSpecification(s) {
   const spec = await utils.fetchW3C(s.href);
   if (spec._links.deliverers) {
@@ -138,5 +138,3 @@ async function loadSpecification(s) {
     return spec;
   }));
 }
-
-module.exports = loadSpecification;

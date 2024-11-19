@@ -1,8 +1,9 @@
 "use strict";
 
-const { notifyWideReview } = require("./notify-wide-review");
-const monitor = require("./lib/monitor.js");
+import { notifyWideReview } from "./notify-wide-review.js";
+import * as monitor  from "./lib/monitor.js";
 
+export default
 function notify(spec) {
   if (spec.status === "Note"
      || spec.status === "Draft Note"
@@ -34,5 +35,3 @@ function notify(spec) {
     notifyWideReview(spec);
   }
 }
-
-module.exports = notify;

@@ -1,6 +1,7 @@
-const utils = require("./lib/utils.js");
+import * as utils from "./lib/utils.js";
 
-function getSpecs() {
+export default
+function W3C_TR() {
     return utils.fetchW3C("specifications").then(specs => {
         return specs.map(spec => {
             return {
@@ -10,6 +11,4 @@ function getSpecs() {
         })
     });
 }
-
-module.exports = getSpecs;
 
