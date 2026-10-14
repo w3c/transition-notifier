@@ -21,10 +21,10 @@
   "homepage": "https://github.com/plehegar/transition-notifier",
   "dependencies": {
     "compression": "1.*.*",
-    "express": "4.*.*",
     "debug": "4.*.*",
+    "express": "4.*.*",
     "handlebars": "4.*.*",
     "jsdom": "25.*.*",
-    "nodemailer": "6.*.*"
+    "nodemailer": "^10.1.1"
   }
 }
