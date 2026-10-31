@@ -25,6 +25,6 @@
     "express": "4.*.*",
     "handlebars": "4.*.*",
     "jsdom": "25.*.*",
-    "nodemailer": "^10.1.1"
+    "nodemailer": "^10.1.4"
   }
 }
